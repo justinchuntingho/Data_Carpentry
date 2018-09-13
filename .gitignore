@@ -1,0 +1,9 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+data/
+data_output/
+fig_output/
+*.Rproj
+HID_*
