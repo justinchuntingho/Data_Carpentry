@@ -15,7 +15,7 @@
 # 
 # Objects Name:
 # - Any name such as `x`, `current_temperature`, or `subject_id`
-# - Explicit and not too long. They
+# - Explicit and not too long. 
 # - Cannot start with a number (`2x` is not valid, but `x2` is).
 # - Case sensitive
 # - Names of fundamental functions can't be used (eg 'if', 'else', 'for')
@@ -40,7 +40,7 @@ area_hectares
 area_hectares <- 2.5
 2.47 * area_hectares
 
-# This means that assigning a value to one object does not change the values of
+# Assigning a value to one object does not change the values of
 # other objects  For example, let's store the plot's area in acres
 # in a new object, `area_acres`:
 
