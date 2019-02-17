@@ -54,22 +54,22 @@ summary(interviews) # summary statistics for each column
 ## Indexing and subsetting data frames                                            ##
 ####################################################################################
 
-## first element in the first column of the data frame (as a vector)
+## first element in the first column of the data frame
 interviews[1, 1]
 
-## first column of the data frame (as a vector)
+## first column of the data frame
 interviews[, 1]
 
-## first column of the data frame (as a data.frame)
+## first column of the data frame
 interviews[1]
 
-## first three elements in the 7th column (as a vector)
+## first three elements in the 7th column
 interviews[1:3, 7]
 
-## the 3rd row of the data frame (as a data.frame)
+## the 3rd row of the data frame
 interviews[3, ]
 
-## equivalent to head_interviews <- head(interviews)
+## equivalent to head(interviews)
 interviews[1:6, ]
 interviews[-c(7:131), ]
 

@@ -51,7 +51,7 @@ area_acres <- 2.47 * area_hectares
 area_hectares <- 50
 
 ########## Question: ########## 
-# What do you think is the current content of the object `area_acres`? 123.5 or 6.175?
+# What do you think is the current content of the object `area_acres`? 123.5 or 2.47?
 
 ###############################
 
