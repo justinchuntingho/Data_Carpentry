@@ -16,9 +16,6 @@ library(tidyverse)
 interviews <- read_csv("data/SAFI_clean.csv", na = "NULL")
 interviews
 
-# preview the data
-View(interviews)
-
 ####################################################################################
 ## Selecting columns and filtering rows                                           ##
 ####################################################################################
@@ -159,6 +156,12 @@ interviews %>%
             min_membrs = min(no_membrs)) %>%
   arrange(desc(min_membrs))
 
+########## Exercise ########## 
+# Use `group_by()` and `summarize()` to find the mean, min, and max
+# number of household members for each village with. Also add the number of
+# observations (hint: see `?n`).
+############################## 
+
 ####################################################################################
 ## Counting                                                                       ##
 ####################################################################################
@@ -171,19 +174,6 @@ interviews %>%
 # `count()` provides the `sort` argument
 interviews %>%
   count(village, sort = TRUE)
-
-########## Exercise ########## 
-# 1. How many households in the survey have an average of
-# two meals per day? Three meals per day? Are there any other numbers
-# of meals represented?
-# 2. Use `group_by()` and `summarize()` to find the mean, min, and max
-# number of household members for each village. Also add the number of
-# observations (hint: see `?n`).
-# 3. What was the largest household interviewed in each month?
-# Tips: Attach the lubridate library using 'library(lubridate)' and
-# use the following code: mutate(month = month(interview_date), day = day(interview_date), year = year(interview_date))
-
-
 
 ####################################################################################
 ## Reshaping with gather and spread                                               ##

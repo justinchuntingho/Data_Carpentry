@@ -20,6 +20,7 @@ library(tidyverse)
 interviews <- read_csv("data/SAFI_clean.csv", na = "NULL")
 
 
+
 ####################################################################################
 ## What are data frames?                                                          ##
 ####################################################################################
@@ -28,6 +29,8 @@ interviews <- read_csv("data/SAFI_clean.csv", na = "NULL")
 # - the representation of data in the format of a table
 # - columns are vectors that all have the same length
 # - each column must contain a single type of data
+
+View(interviews) # view the dataframe as a spreadsheet
 
 ## Inspecting data frames
 # There are functions to extract this information from data frames.
@@ -149,13 +152,6 @@ as.character(respondent_floor_type)
 year_fct <- factor(c(1990, 1983, 1977, 1998, 1990))
 as.numeric(year_fct)                     # Wrong! And there is no warning...
 as.numeric(as.character(year_fct))       # Works...
-as.numeric(levels(year_fct))[year_fct]   # The recommended way.
-
-# Notice that in the recommended `levels()` approach, three important steps occur:
-# 1. We obtain all the factor levels using `levels(year_fct)`
-# 2. We convert these levels to numeric values using `as.numeric(levels(year_fct))`
-# 3. We then access these numeric values using the underlying integers of the vector `year_fct`
-
 
 ####################################################################################
 ## Renaming factors                                                               ##
