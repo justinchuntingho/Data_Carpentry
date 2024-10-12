@@ -13,7 +13,7 @@
 
 # Set Up
 library(tidyverse)
-interviews <- read_csv("data/SAFI_clean.csv", na = "NULL")
+interviews <- read_csv("SAFI_clean.csv", na = "NULL")
 interviews
 
 ####################################################################################
@@ -23,8 +23,24 @@ interviews
 # The first argument is the dataframe and the subsequent are the columns to keep.
 select(interviews, village, no_membrs, years_liv)
 
+# to do the same thing with subsetting
+interviews[c("village","no_membrs","months_lack_food")]
+
+# to select a series of connected columns
+select(interviews, village:respondent_wall_type)
+
 # To choose rows based on a specific criteria, use `filter()`:
-filter(interviews, village == "God")
+filter(interviews, village == "Chirodzo")
+
+# filters observations with "and" operator (comma)
+# output dataframe satisfies ALL specified conditions
+filter(interviews, village == "Chirodzo",
+       rooms > 1,
+       no_meals > 2)
+
+# filters observations with "|" logical operator
+# output dataframe satisfies AT LEAST ONE of the specified conditions
+filter(interviews, village == "Chirodzo" | village == "Ruaca")
 
 
 ####################################################################################
@@ -34,37 +50,39 @@ filter(interviews, village == "God")
 # There are three ways to do this: use intermediate steps, nested functions, or pipes.
 
 # Intermediate steps
-interviews2 <- filter(interviews, village == "God")
-interviews_god <- select(interviews2, no_membrs, years_liv)
+interviews2 <- filter(interviews, village == "Chirodzo")
+interviews_ch <- select(interviews2, village:respondent_wall_type)
 
 # Nest functions (i.e. one function inside of another)
-interviews_god <- select(filter(interviews, village == "God"), no_membrs, years_liv)
+interviews_ch <- select(filter(interviews, village == "Chirodzo"), village:respondent_wall_type)
 
 ## Pipes
 # - take the output of one function and send it directly to the next
 # - `%>%`
 # - require the `magrittr` package
 # - you can type the pipe with 'Ctrl' + 'Shift' + 'M' ('Cmd' + 'Shift' + 'M' for Mac)
-
 interviews %>%
-  filter(village == "God") %>%
-  select(no_membrs, years_liv)
+  filter(village == "Chirodzo") %>%
+  select(village:respondent_wall_type)
+
+# we can also use |> (called native R pipe) and it comes preinstalled with R v4.1.0 onwards)
+interviews |>
+  filter(village == "Chirodzo") |>
+  select(village:respondent_wall_type)
 
 # If we want to create a new object with this smaller version of the data, we
 # can assign it a new name:
+interviews_ch <- interviews %>%
+  filter(village == "Chirodzo") %>%
+  select(village:respondent_wall_type)
 
-interviews_god <- interviews %>%
-  filter(village == "God") %>%
-  select(no_membrs, years_liv)
-
-interviews_god
+interviews_ch
 
 
 ########## Exercise ########## 
 # Using pipes, subset the `interviews` data to include interviews
 # where respondents were members of an irrigation association (`memb_assoc`)
 # and retain only the columns `affect_conflicts`, `liv_count`, and `no_meals`.
-
 ############################## 
 
 ####################################################################################
@@ -101,7 +119,6 @@ interviews %>%
 #
 #  **Hint**: think about how the commands should be ordered to produce this data
 #  frame!
-
 ############################## 
 
 ####################################################################################
@@ -120,13 +137,20 @@ interviews %>%
 
 #So to compute the average household size by village:
 interviews %>%
-  group_by(village) %>%
-  summarize(mean_no_membrs = mean(no_membrs))
+  group_by(village, memb_assoc) %>%
+  summarize(mean_no_membrs = mean(no_membrs)) %>%
+  ungroup()
 
 # You can also group by multiple columns:
 interviews %>%
   group_by(village, memb_assoc) %>%
   summarize(mean_no_membrs = mean(no_membrs))
+
+# Note that the output is a grouped tibble. To obtain an ungrouped tibble, use the ungroup function:
+interviews %>%
+  group_by(village, memb_assoc) %>%
+  summarize(mean_no_membrs = mean(no_membrs)) %>%
+  ungroup()
 
 # We can exclude missing data from our table using a filter step.
 interviews %>%
@@ -156,9 +180,10 @@ interviews %>%
             min_membrs = min(no_membrs)) %>%
   arrange(desc(min_membrs))
 
+
 ########## Exercise ########## 
 # Use `group_by()` and `summarize()` to find the mean, min, and max
-# number of household members for each village with. Also add the number of
+# number of household members for each village. Also add the number of
 # observations (hint: see `?n`).
 ############################## 
 
@@ -175,118 +200,13 @@ interviews %>%
 interviews %>%
   count(village, sort = TRUE)
 
-####################################################################################
-## Reshaping with gather and spread                                               ##
-####################################################################################
-# In the spreadsheet lesson, 
-# we discussed how to structure our data leading to the four rules defining a tidy dataset:
-# 1. Each variable has its own column
-# 2. Each observation has its own row
-# 3. Each value must have its own cell
-# 4. Each type of observational unit forms a table
-# 
-# Here we examine the fourth rule: Each type of observational unit forms a table.
-# 
-# In `interviews`, each row contains the values of variables associated with each
-# record (the unit), values such as the number of household members or posessions
-# associated with each record. What if instead of comparing records, we wanted to
-# look at differences in households grouped by different types of housing
-# construction materials?
-# 
-# We'd need to create a new table where each row (the unit) is comprised
-# of values of variables associated with each housing material (e.g. for
-# `respondent_wall_type`). In practical terms this means the values
-# of the wall construction materials in `respondent_wall_type` would
-# become the names of column variables and the cells would contain `TRUE` or `FALSE`.
-# 
-# Having created a new table, we can now explore the relationship within and
-# between household types - for example we could compare the ratio of household
-# members to sleeping rooms grouped by type of construction material. The key
-# point here is that we are still following a tidy data structure, but we have
-# reshaped the data according to the observations of interest.
-# 
-# The opposite transformation would be to transform column names into values of
-# a variable.
-# 
-# We can do both these of transformations with two `tidyr` functions, `spread()`
-# and `gather()`.
-
-## Spreading
-# 
-# `spread()` takes three principal arguments:
-# 1. the data
-# 2. the *key* column variable whose values will become new column names.
-# 3. the *value* column variable whose values will fill the new column variables.
-# 
-# Let's use `spread()` to transform interviews to create new columns for each type
-# of wall construction material. We use the pipe as before too. Because both the
-# `key` and `value` parameters must come from column values, we will create a
-# dummy column (we'll name it `wall_type_logical`) to hold the value `TRUE`, which
-# we will then place into the appropriate column that corresponds to the wall
-# construction material for that respondent. When using `mutate()` if you give a
-# single value, it will be used for all observations in the dataset. We will use
-# `fill = FALSE` in `spread()` to fill the rest of the new columns for that row
-# with `FALSE`.
-
-interviews_spread <- interviews %>%
-  mutate(wall_type_logical = TRUE) %>%
-  spread(key = respondent_wall_type, value = wall_type_logical, fill = FALSE)
-View(interviews_spread)
-View(interviews)
-
-## Gathering
-# The opposing situation could occur if we had been provided with data in the form
-# of `interviews_spread`, where the building materials are column names, but we
-# wish to treat them as values of a `respondent_wall_type` variable instead.
-# 
-# In this situation we are gathering the column names and turning them into a pair
-# of new variables. One variable represents the column names as values, and the
-# other variable contains the values previously associated with the column names.
-# We will do this in two steps to make this process a bit clearer.
-# 
-# `gather()` takes four principal arguments:
-# 1. the data
-# 2. the *key* column variable we wish to create from column names.
-# 3. the *value* column variable we wish to create and fill with values
-# associated with the key.
-# 4. the names of the columns we use to fill the key variable (or to drop).
-# 
-# To recreate our original data frame, we will use the following:
-# 1. the data - `interviews_spread`
-# 2. the *key* column will be "respondent_wall_type" (as a character string). This
-#    is the name of the new column we want to create.
-# 3. the *value* column will be `wall_type_logical`. This will be either `TRUE` or
-#    `FALSE`.
-# 4. the names of the columns we will use to fill the key variable are
-#    `burntbricks:sunbricks` (the column named "burntbricks" up to and including
-#    the column named "sunbricks" as they are ordered in the data frame).
-# 
-interviews_gather <- interviews_spread %>%
-  gather(key = respondent_wall_type, value = "wall_type_logical",
-         burntbricks:sunbricks)
-
-# This creates a data frame with 524 rows (4 rows per interview respondent). 
-# The four rows for each respondent differ only in the
-# value of the "respondent_wall_type" and "dummy" columns. 
-# 
-# Only one row for each interview respondent is informative - we know that if the
-# house walls are made of "sunbrick" they aren't made of any other the other
-# materials. Therefore, we can get filter our dataset to only keep values where
-# `wall_type_logical` is `TRUE`. Because, `wall_type_logical` is already either
-# `TRUE` or `FALSE`, when passing the column name to `filter()`, it will
-# automatically already only keep rows where this column has the value `TRUE`. We
-# can then remove the `wall_type_logical` column. We do all of these steps
-# together in the next chunk of code:
-
-interviews_gather <- interviews_spread %>%
-  gather(key = "respondent_wall_type", value = "wall_type_logical",
-         burntbricks:sunbricks) %>%
-  filter(wall_type_logical) %>%
-  select(-wall_type_logical)
-
-# View both `interviews_gather` and `interviews_spread` and compare their
-# structure. Notice that the rows have been reordered in `interviews_gather` such
-# that all of the respondents with a particular wall type are grouped together.
+########## Exercise ########## 
+# 1. How many households in the survey have two meals per day? Three meals per day? 
+#    Are there any other numbers of meals represented?
+# 2. Use group_by() and summarize() to find the mean, min, and max number of household members for each village. 
+#    Also add the number of observations (hint: see ?n).
+# 3. What was the largest household interviewed in each month?
+############################## 
 
 ####################################################################################
 ## Exporting data                                                                 ##
@@ -316,4 +236,4 @@ interviews_plotting <- interviews %>%
   mutate(number_items = rowSums(select(., bicycle:television)))
 
 # Now we can save this data frame to our `data_output` directory.
-write_csv(interviews_plotting, path = "data_output/interviews_plotting.csv")
+write_csv(interviews_plotting, path = "interviews_plotting.csv")

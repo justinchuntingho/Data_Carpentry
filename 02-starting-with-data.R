@@ -4,11 +4,8 @@
 ## Setting Up                                                                     ##
 ####################################################################################
 
-dir.create("data")
-dir.create("data_output")
-dir.create("fig_output")
 download.file("https://ndownloader.figshare.com/files/11492171",
-              "data/SAFI_clean.csv", mode = "wb")
+              "SAFI_clean.csv", mode = "wb")
 
 
 # You are going load the data in R's memory using the function `read_csv()`
@@ -17,8 +14,7 @@ download.file("https://ndownloader.figshare.com/files/11492171",
 # The missing data is encoded as "NULL" in the dataset. 
 
 library(tidyverse)
-interviews <- read_csv("data/SAFI_clean.csv", na = "NULL")
-
+interviews <- read_csv("SAFI_clean.csv", na = "NULL")
 
 
 ####################################################################################
@@ -51,7 +47,7 @@ names(interviews) # returns the column names (same as 'colnames()')
 # Summary:
 str(interviews) # structure of the object and information about the class, length and content of each column
 summary(interviews) # summary statistics for each column
-
+glimpse(interviews)
 
 ####################################################################################
 ## Indexing and subsetting data frames                                            ##
@@ -65,6 +61,9 @@ interviews[, 1]
 
 ## first column of the data frame
 interviews[1]
+
+## first column of the data frame (as a vector)
+interviews[[1]]
 
 ## first three elements in the 7th column
 interviews[1:3, 7]
@@ -81,7 +80,7 @@ interviews[, -1]
 
 # Data frames can be subset by calling indices (as shown previously), 
 # but also by calling their column names directly:
-  
+
 interviews["village"]       # Result is a data frame
 interviews[, "village"]     # Result is a data frame
 interviews[["village"]]     # Result is a vector
@@ -101,7 +100,6 @@ interviews$village          # Result is a vector
 # 4. Combine `nrow()` with the `-` notation above to reproduce the behavior of
 #    `head(interviews)`, keeping just the first through 6th rows of the interviews
 #    dataset.
-
 ############################## 
 
 ####################################################################################
@@ -137,10 +135,20 @@ respondent_floor_type # after re-ordering
 # Let's say we made a mistake and need to recode "cement" to "brick".
 levels(respondent_floor_type)
 
-levels(respondent_floor_type)[2] <- "brick"
+respondent_floor_type <- fct_recode(respondent_floor_type, brick = "cement")
 levels(respondent_floor_type)
 
+levels(respondent_floor_type)[2] <- "brick"
+
+
 respondent_floor_type
+
+# You can make your factor an ordered factor by using the ordered=TRUE option inside your factor function. 
+# Note how the reported levels changed from the unordered factor above to the ordered version below. 
+# Ordered levels use the less than sign < to denote level ranking.
+respondent_floor_type_ordered <- factor(respondent_floor_type, 
+                                        ordered = TRUE)
+respondent_floor_type_ordered
 
 # Converting a factor to a character vector
 as.character(respondent_floor_type)
@@ -152,6 +160,8 @@ as.character(respondent_floor_type)
 year_fct <- factor(c(1990, 1983, 1977, 1998, 1990))
 as.numeric(year_fct)                     # Wrong! And there is no warning...
 as.numeric(as.character(year_fct))       # Works...
+as.numeric(levels(year_fct))[year_fct]   # The recommended way.
+
 
 ####################################################################################
 ## Renaming factors                                                               ##
@@ -185,5 +195,39 @@ plot(memb_assoc)
 #   "No","Undetermined", and "Yes". 
 # * Now that we have renamed the factor level to "Undetermined", can you
 #   recreate the barplot such that "Undetermined" is last (after "Yes")?
-
 ##############################
+
+####################################################################################
+## Formatting Dates                                                               ##
+####################################################################################
+
+library(lubridate)
+
+dates <- interviews$interview_date
+str(dates)
+
+# When we imported the data in R, read_csv() recognized that this column contained date information. 
+# We can now use the day(), month() and year() functions to extract this information from the date, 
+# and create new columns in our data frame to store it:
+interviews$day <- day(dates)
+interviews$month <- month(dates)
+interviews$year <- year(dates)
+interviews
+
+
+# In our example above, the interview_date column was read in correctly as a Date variable but generally that is not the case. 
+# Date columns are often read in as character variables and one can use the as_date() function to convert them to the appropriate Date/POSIXctformat.
+
+
+char_dates <- c("7/31/2012", "8/9/2014", "4/30/2016")
+str(char_dates)
+
+as_date(char_dates, format = "%m/%d/%Y")
+
+# Argument format tells the function the order to parse the characters and identify the month, day and year. 
+# The format above is the equivalent of mm/dd/yyyy. A wrong format can lead to parsing errors or incorrect results.
+as_date(char_dates, format = "%m/%d/%y") # the %y part of the format stands for a two-digit year instead of a four-digit year
+
+# We can also use functions ymd(), mdy() or dmy() to convert character variables to date.
+mdy(char_dates)
+

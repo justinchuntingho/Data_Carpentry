@@ -15,7 +15,7 @@
 # 
 # Objects Name:
 # - Any name such as `x`, `current_temperature`, or `subject_id`
-# - Explicit and not too long. 
+# - Explicit and not too long.
 # - Cannot start with a number (`2x` is not valid, but `x2` is).
 # - Case sensitive
 # - Names of fundamental functions can't be used (eg 'if', 'else', 'for')
@@ -30,12 +30,12 @@
 area_hectares <- 1.0    # doesn't print anything
 (area_hectares <- 1.0)
 area_hectares
- 
+
 # Now that R has `area_hectares` in memory, we can do arithmetic with it. For
 # instance, we may want to convert this area into acres (area in acres is 2.47 times the area in hectares):
 
 2.47 * area_hectares
- 
+
 # We can also change an object's value by assigning it a new one:
 area_hectares <- 2.5
 2.47 * area_hectares
@@ -51,8 +51,7 @@ area_acres <- 2.47 * area_hectares
 area_hectares <- 50
 
 ########## Question: ########## 
-# What do you think is the current content of the object `area_acres`? 123.5 or 2.47?
-
+# What do you think is the current content of the object `area_acres`? 123.5 or 6.175?
 ###############################
 
 ####################################################################################
@@ -72,12 +71,11 @@ area_acres				# print land area in acres.
 # lines you  want to comment, press at the same time on your keyboard
 # 'Ctrl' + 'Shift' + 'C'. 
 
- 
-########## Exercise ########## 
-# Create two variables `length` and `width` and assign them values.
-# Create a third variable `area` and give it a value based on 
-# the current values of `length` and `width`.
 
+########## Exercise ########## 
+# Create two variables `r_length` and `r_width` and assign them values (eg 2 and 3).
+# Create a third variable `r_area` and give it a value based on 
+# the current values of `r_length` times `r_width`.
 ##############################
 
 ####################################################################################
@@ -131,6 +129,12 @@ round(digits = 2, x = 3.14159)
 # definition of a function with unfamiliar arguments to understand what you're
 # doing.
 
+########## Exercise ########## 
+# Type in ?round at the console and then look at the output in the Help pane. 
+# What other functions exist that are similar to round? 
+# How do you use the digits parameter in the round function?
+###############################
+
 ####################################################################################
 ## Vectors and data types                                                         ##
 ####################################################################################
@@ -140,10 +144,10 @@ round(digits = 2, x = 3.14159)
 # - can be assigned using the `c()` function.
 
 # For example, we can create a vector of household members for the households 
-# we've interviewed and assign it to a new object `no_membrs`:
+# we've interviewed and assign it to a new object `hh_members`:
 
-no_membrs <- c(3, 7, 10, 6)
-no_membrs
+hh_members <- c(3, 7, 10, 6)
+hh_members
 
 # A vector can also contain characters. For example, we can have
 # a vector of the building material used to construct our
@@ -159,20 +163,20 @@ respondent_wall_type
 # There are many functions that allow you to inspect the content of a
 # vector. `length()` tells you how many elements are in a particular vector:
 
-length(no_membrs)
+length(hh_members)
 length(respondent_wall_type)
 
-# An important feature of a vector, is that all of the elements are the same type of data.
-# The function `class()` indicates the class (the type of element) of an object:
+# An important feature of a vector, is that all of the elements are the same type of data. 
+# The function typeof() indicates the type of an object:
 
-class(no_membrs)
-class(respondent_wall_type)
+typeof(hh_members)
+typeof(respondent_wall_type)
 
 # The function `str()` provides an overview of the structure of an object and its
 # elements. It is a useful function when working with large and complex
 # objects:
 
-str(no_membrs)
+str(hh_members)
 str(respondent_wall_type)
 
 # You can use the `c()` function to add other elements to your vector:
@@ -204,9 +208,7 @@ char_logical <- c("a", "b", "c", TRUE)
 tricky <- c(1, 2, 3, "4")
 
 # 3. Why do you think it happens?
-
-
-##############################
+###############################
 
 ########## Question ##########
 # How many values in `combined_logical` are `"TRUE"` (as a character) in the
@@ -215,7 +217,7 @@ tricky <- c(1, 2, 3, "4")
 num_logical <- c(1, 2, 3, TRUE)
 char_logical <- c("a", "b", "c", TRUE)
 combined_logical <- c(num_logical, char_logical)
-
+###############################
 
 
 ####################################################################################
@@ -230,20 +232,32 @@ respondent_wall_type[2]
 respondent_wall_type[1:2]
 respondent_wall_type[c(3, 2)]
 respondent_wall_type[c(1, 2, 3, 2, 1, 3)]
- 
+
 # Another common way of subsetting is by using a logical vector. `TRUE` will
 # select the element with the same index, while `FALSE` will not:
 
-no_membrs <- c(3, 7, 10, 6)
-no_membrs[c(TRUE, FALSE, TRUE, TRUE)]
+hh_members <- c(3, 7, 10, 6)
+hh_members[c(TRUE, FALSE, TRUE, TRUE)]
 
 # Typically, these logical vectors are not typed by hand, but are the output of
 # other functions or logical tests. For instance, if you wanted to select only the
 # values above 5:
 
-no_membrs
-no_membrs > 5 
-no_membrs[no_membrs > 5]
+hh_members
+hh_members > 5 
+hh_members[hh_members > 5]
+
+# You can combine multiple tests using & (both conditions are true, AND) 
+# or | (at least one of the conditions is true, OR):
+#  < stands for “less than”, > for “greater than”, >= for “greater than or equal to”, and == for “equal to”. 
+# The double equal sign == is a test for numerical equality between the left and right hand sides, 
+# and should not be confused with the single = sign, which performs variable assignment (similar to <-).
+# The function %in% allows you to test if any of the elements of a search vector (on the left hand side) are found in the target vector (on the right hand side)
+
+possessions %in% c("car", "bicycle")
+
+
+
 
 ####################################################################################
 ## Missing data                                                                   ##
@@ -266,3 +280,14 @@ rooms[!is.na(rooms)]
 
 # Returns the object with incomplete cases removed.
 na.omit(rooms)
+
+# Extract those elements which are 'complete.cases()'.
+rooms[complete.cases(rooms)]
+
+
+########## Exercise ##########
+# 1. Using this vector of rooms, create a new vector with the NAs removed.
+rooms <- c(1, 2, 1, 1, NA, 3, 1, 3, 2, 1, 1, 8, 3, 1, NA, 1)
+# 2. Use the function median() to calculate the median of the rooms vector.
+# 3. Use R to figure out how many households in the set has more than 2 rooms.
+###############################
